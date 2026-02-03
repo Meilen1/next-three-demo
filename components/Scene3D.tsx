@@ -59,6 +59,7 @@ export default function Scene3D() {
     position: new THREE.Vector3(4.5, 0, -4),
     size: { w: 2.5, d: 2 }
   }
+
 ];
 
 
