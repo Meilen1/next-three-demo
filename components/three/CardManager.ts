@@ -19,7 +19,7 @@ export default class CardManager {
 
   add(card: Card3D) {
     this.cards.push(card);
-    this.scene.add(card.mesh);
+    this.scene.add(card.group);
   }
 
   pick(mouse: THREE.Vector2) {

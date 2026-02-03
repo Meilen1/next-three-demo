@@ -4,14 +4,73 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import Card3D from "./three/Card3D";
 import CardManager from "./three/CardManager";
+import RoadNetwork from "./three/RoadNetwork";
 
 export default function Scene3D() {
   const mountRef = useRef<HTMLDivElement>(null);
+  
+
+  const cityLayout = [
+  {
+    id: "mapa",
+    image: "/cards/Nosotros.jpg",
+    position: new THREE.Vector3(-6, 0, 4),
+    size: { w: 5, d: 3 }
+  },
+  {
+    id: "historia",
+    image: "/cards/historia.jpg",
+    position: new THREE.Vector3(-1, 0, 4),
+    size: { w: 3, d: 2 }
+  },
+  {
+    id: "smartflow",
+    image: "/cards/smartflow.jpg",
+    position: new THREE.Vector3(4, 0, 4),
+    size: { w: 4.5, d: 2.5 }
+  },
+  {
+    id: "beneficios",
+    image: "/cards/beneficios.jpg",
+    position: new THREE.Vector3(-6, 0, 0),
+    size: { w: 3, d: 2 }
+  },
+  {
+    id: "servicios",
+    image: "/cards/servicios.jpg",
+    position: new THREE.Vector3(-1, 0, 0),
+    size: { w: 4, d: 3 }
+  },
+  {
+    id: "datos",
+    image: "/cards/datos.jpg",
+    position: new THREE.Vector3(4, 0, 0),
+    size: { w: 3, d: 2 }
+  },
+  {
+    id: "contacto",
+    image: "/cards/Nosotros.png",
+    position: new THREE.Vector3(-2.5, 0, -4),
+    size: { w: 5, d: 2.5 }
+  },
+  {
+    id: "nosotros",
+    image: "/cards/nosotros.jpg",
+    position: new THREE.Vector3(4.5, 0, -4),
+    size: { w: 2.5, d: 2 }
+  }
+];
+
 
   useEffect(() => {
     if (!mountRef.current) return;
 
     const scene = new THREE.Scene();
+    const roads = new RoadNetwork(scene);
+
+    const groundTexture = new THREE.TextureLoader().load("/pasto.jpg");
+
+
 
     /* CAMERA */
     const { clientWidth, clientHeight } = mountRef.current;
@@ -36,36 +95,88 @@ export default function Scene3D() {
     renderer.setPixelRatio(window.devicePixelRatio);
     mountRef.current.appendChild(renderer.domElement);
 
+
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+
+    // cuántas veces se repite la imagen
+    groundTexture.repeat.set(50, 50);
+
+    groundTexture.colorSpace = THREE.SRGBColorSpace;
+    groundTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(200, 200),
+      new THREE.MeshStandardMaterial({
+        map: groundTexture,
+        roughness: 1,
+        metalness: 0
+      })
+    );
+
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = 0;
+    ground.receiveShadow = true;
+
+    scene.add(ground);
+        
+
     /* LIGHTS */
     scene.add(new THREE.AmbientLight(0xffffff, 0.5));
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(3, 4, 2);
     scene.add(light);
 
-    /* TEXTURE */
-    const texture = new THREE.TextureLoader().load("/PUENTE_LABRUNA.jpg");
-    texture.minFilter = THREE.LinearMipmapLinearFilter;
-    texture.generateMipmaps = true;
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.magFilter = THREE.LinearFilter;
+    // Calle horizontal superior
+    roads.addRoad(
+      new THREE.Vector3(0, 0.001, 2),
+      { w: 18, d: 1.2 }
+    );
 
-    // máximo real de la GPU
-    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    // Calle horizontal central
+    roads.addRoad(
+      new THREE.Vector3(0, 0.001, -2),
+      { w: 18, d: 1.2 }
+    );
+
+    // Calle vertical izquierda
+    roads.addRoad(
+      new THREE.Vector3(-3.5, 0.001, 0),
+      { w: 1.2, d: 10 }
+    );
+
+    // Calle vertical derecha
+    roads.addRoad(
+      new THREE.Vector3(3.5, 0.001, 0),
+      { w: 1.2, d: 10 }
+    );
 
 
 /* ========= CARD MANAGER ========= */
 const cardManager = new CardManager(camera, scene);
 
-const columns = [-10.5, -7, -3.5, 0, 3.5, 7, 10.5, 14];
-const rows = [-9.6, -6.5,-3.2, 0, 3.2, 6.5, 9.6, 12.8];
+/* TEXTURE */
+const loader = new THREE.TextureLoader();
 
-rows.forEach(z => {
-  columns.forEach(x => {
-    cardManager.add(
-      new Card3D(texture, new THREE.Vector3(x, 0, z))
-    );
-  });
+cityLayout.forEach(lot => {
+  const texture = loader.load(lot.image);
+
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.magFilter = THREE.LinearFilter;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+  cardManager.add(
+    new Card3D(
+      texture,
+      lot.position,
+      lot.size,
+      lot.id
+    )
+  );
 });
+
 
     const mouse = new THREE.Vector2();
 
