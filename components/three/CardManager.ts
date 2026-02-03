@@ -28,16 +28,15 @@ export default class CardManager {
 
     this.raycaster.setFromCamera(mouse, this.camera);
 
-    // 🔑 compensar near negativo
+    // compensar near negativo
     this.raycaster.ray.origin.addScaledVector(
       this.raycaster.ray.direction,
       -this.backOffset
     );
 
-    const hits = this.raycaster.intersectObjects(
-      this.cards.map(c => c.mesh),
-      true
-    );
+    const hitObjects = this.cards.flatMap(c => [c.mesh, c.base]);
+
+    const hits = this.raycaster.intersectObjects(hitObjects, true);
 
     if (hits.length === 0) {
       this.hovered = null;
@@ -53,6 +52,7 @@ export default class CardManager {
       this.cards.find(
         c =>
           c.mesh === farthestHit.object ||
+          c.base === farthestHit.object ||
           c.mesh.children.includes(farthestHit.object)
       ) || null;
   }
