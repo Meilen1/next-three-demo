@@ -69,7 +69,7 @@ export default function Scene3D() {
     const scene = new THREE.Scene();
     const roads = new RoadNetwork(scene);
 
-    const groundTexture = new THREE.TextureLoader().load("/pasto.jpg");
+    const groundTexture = new THREE.TextureLoader().load("/PASTO2.png");
 
 
 
@@ -101,13 +101,13 @@ export default function Scene3D() {
     groundTexture.wrapT = THREE.RepeatWrapping;
 
     // cuántas veces se repite la imagen
-    groundTexture.repeat.set(50, 50);
+    groundTexture.repeat.set(20, 20);
 
     groundTexture.colorSpace = THREE.SRGBColorSpace;
     groundTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(200, 200),
+      new THREE.PlaneGeometry(40, 40),
       new THREE.MeshStandardMaterial({
         map: groundTexture,
         roughness: 1,
@@ -123,8 +123,8 @@ export default function Scene3D() {
         
 
     /* LIGHTS */
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const light = new THREE.DirectionalLight(0xffffff, 1);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+    const light = new THREE.DirectionalLight(0xffffff, 2);
     light.position.set(3, 4, 2);
     scene.add(light);
 
